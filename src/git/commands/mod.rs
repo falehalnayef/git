@@ -1,8 +1,11 @@
+mod hash_object;
 mod init;
-use init::init;
 
+use hash_object::hash_object;
+use init::init;
 pub enum Command {
     Init,
+    HashBlob(String),
 }
 
 impl Command {
@@ -10,6 +13,9 @@ impl Command {
         match self {
             Command::Init => {
                 init();
+            }
+            Command::HashBlob(file_path) => {
+                hash_object(file_path.to_string()).unwrap();
             }
         }
     }
