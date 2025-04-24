@@ -1,10 +1,10 @@
 mod commands;
 
 use commands::Command;
-pub fn start() {
-    //    let command = Command::Init;
-    //  command.execute();
-    let command2 = Command::HashBlob("hello.txt".to_string());
-
-    command2.execute();
+pub fn start(args: Vec<String>) {
+    match args[1].as_str() {
+        "init" => Command::Init.execute(),
+        "hash-object" => Command::HashBlob(args).execute(),
+        _ => println!("Command not found"),
+    }
 }

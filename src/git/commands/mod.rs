@@ -5,7 +5,7 @@ use hash_object::hash_object;
 use init::init;
 pub enum Command {
     Init,
-    HashBlob(String),
+    HashBlob(Vec<String>),
 }
 
 impl Command {
@@ -14,8 +14,10 @@ impl Command {
             Command::Init => {
                 init();
             }
-            Command::HashBlob(file_path) => {
-                hash_object(file_path.to_string()).unwrap();
+            Command::HashBlob(args) => {
+                if let Err(e) = hash_object(args.clone()) {
+                    println!("{}", e);
+                }
             }
         }
     }
