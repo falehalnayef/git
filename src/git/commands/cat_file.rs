@@ -61,3 +61,28 @@ fn decompress_blob(blob: &Vec<u8>) -> io::Result<Vec<u8>> {
 
     Ok(decompressed_data)
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_compress_blob() {
+        let hashed_blob: Vec<u8> = vec![
+            120, 156, 75, 202, 201, 79, 82, 48, 52, 102, 96, 240, 72, 205, 201, 201, 215, 81, 40,
+            73, 45, 46, 81, 4, 0, 67, 62, 6, 69,
+        ];
+
+        let decompressed_blob = decompress_blob(&hashed_blob);
+
+        assert!(decompressed_blob.is_ok());
+        assert_eq!(
+            decompressed_blob.unwrap(),
+            [
+                98, 108, 111, 98, 32, 49, 51, 0, 0, 72, 101, 108, 108, 111, 44, 32, 116, 101, 115,
+                116, 33,
+            ]
+        );
+    }
+}

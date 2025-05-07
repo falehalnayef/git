@@ -1,4 +1,4 @@
-use std::io::{self, Write};
+use std::io;
 use std::{fs, path::Path};
 
 pub fn init() -> io::Result<()> {

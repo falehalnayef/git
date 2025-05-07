@@ -28,12 +28,10 @@ pub fn hash_object(args: Vec<String>) -> Result<(), Error> {
     let hashed_blob = hash_blob(&blob);
 
     let compressed_blob = compress_blob(&blob)?;
-    let temp = compressed_blob.clone();
     if written {
         store_blob(&hashed_blob, compressed_blob)?;
     }
     println!("{}", hashed_blob);
-    println!("{:?}", temp);
     Ok(())
 }
 
