@@ -28,12 +28,12 @@ pub fn hash_object(args: Vec<String>) -> Result<(), Error> {
     let hashed_blob = hash_blob(&blob);
 
     let compressed_blob = compress_blob(&blob)?;
-
+    let temp = compressed_blob.clone();
     if written {
         store_blob(&hashed_blob, compressed_blob)?;
     }
     println!("{}", hashed_blob);
-
+    println!("{:?}", temp);
     Ok(())
 }
 
@@ -64,7 +64,6 @@ fn build_blob(content: &Vec<u8>) -> Vec<u8> {
     let mut blob = Vec::with_capacity(header.len() + content.len());
     blob.extend_from_slice(header.as_bytes());
     blob.extend_from_slice(content);
-
     blob
 }
 
@@ -81,4 +80,72 @@ fn compress_blob(blob: &Vec<u8>) -> io::Result<Vec<u8>> {
     encoder.write_all(blob)?;
 
     encoder.finish()
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_read_file() {
+        let path = Path::new("test.txt");
+        let mut file = File::create(&path).expect("Failed to create file");
+        file.write_all(b"\0Hello, test!").expect("Write failed");
+
+        let file = read_file(&path);
+        assert!(file.is_ok());
+        let file = file.unwrap();
+        let s = if let Some(pos) = file.iter().position(|&b| b == 0) {
+            String::from_utf8_lossy(&file[pos + 1..]).to_string()
+        } else {
+            String::new()
+        };
+
+        assert_eq!(s, "Hello, test!");
+    }
+
+    #[test]
+    fn test_build_blob() {
+        let s = String::from("Hello, test!");
+        let content = s.into_bytes();
+
+        let result = build_blob(&content);
+
+        let mut expected = format!("blob {}\0", content.len()).into_bytes();
+        expected.extend_from_slice(&content);
+
+        assert_eq!(result, expected);
+    }
+    #[test]
+    fn test_hash_blob() {
+        let blob: Vec<u8> = vec![
+            98, 108, 111, 98, 32, 49, 51, 0, 0, 72, 101, 108, 108, 111, 44, 32, 116, 101, 115, 116,
+            33,
+        ];
+
+        let hashed_blob = hash_blob(&blob);
+        println!("test hash: {}", hashed_blob);
+
+        assert_eq!(hashed_blob, "d50f93f7a00ded2bbd5706a897299cd490e12f26");
+    }
+
+    #[test]
+    fn test_compress_blob() {
+        let hashed_blob: Vec<u8> = vec![
+            98, 108, 111, 98, 32, 49, 51, 0, 0, 72, 101, 108, 108, 111, 44, 32, 116, 101, 115, 116,
+            33,
+        ];
+
+        let compressed_blob = compress_blob(&hashed_blob);
+
+        assert!(compressed_blob.is_ok());
+        assert_eq!(
+            compressed_blob.unwrap(),
+            [
+                120, 156, 75, 202, 201, 79, 82, 48, 52, 102, 96, 240, 72, 205, 201, 201, 215, 81,
+                40, 73, 45, 46, 81, 4, 0, 67, 62, 6, 69
+            ]
+        );
+    }
 }
